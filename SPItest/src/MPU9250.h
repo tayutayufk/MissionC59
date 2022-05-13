@@ -1,3 +1,12 @@
+/*
+ Author : Yuta Takayasu
+ Date : 2022/5/14
+
+    Library for operating barometer with ESP32.
+    It depends on SPICREATE.h and SPICREATE.h
+*/
+
+
 #pragma once
 
 #ifndef MPU_H
@@ -28,7 +37,7 @@ class MPU
 
 public:
     void begin(SPICREATE::SPICreate *targetSPI, int cs, uint32_t freq = 8000000);
-    uint8_t WhoImI();
+    uint8_t WhoAmI();
     void Get(int16_t *rx);
 };
 
@@ -55,12 +64,12 @@ void MPU::begin(SPICREATE::SPICreate *targetSPI, int cs, uint32_t freq)
     deviceHandle = MPUSPI->addDevice(&if_cfg, cs);
 
     //Init
-    MPUSPI->setReg(MPU_ACC_CONFIG, MPU_16G, deviceHandle);
-    MPUSPI->setReg(MPU_GYRO_CONFIG, MPU_2500deg, deviceHandle);
+    MPUSPI->setReg(MPU_ACC_CONFIG, MPU_16G, deviceHandle);//set range 16G
+    MPUSPI->setReg(MPU_GYRO_CONFIG, MPU_2500deg, deviceHandle);//set range 2500 deg/s
 
     return;
 }
-uint8_t MPU::WhoImI()
+uint8_t MPU::WhoAmI()
 {
     return MPUSPI->readByte(0x80 | 0x75, deviceHandle);
 }
