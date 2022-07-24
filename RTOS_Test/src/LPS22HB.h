@@ -19,7 +19,7 @@
 #define LPS_Data_Adress_2 0x2A
 
 #define LPS_WakeUp_Adress 0x10
-#define LPS_WakeUp_Value 0x50
+#define LPS_WakeUp_Value 0x40
 #define LPS_WhoAmI_Adress 0x0F
 
 class LPS
@@ -56,21 +56,24 @@ void LPS::begin(SPICREATE::SPICreate *targetSPI, int cs, uint32_t freq)
     if_cfg.post_cb = csSet;
 
     deviceHandle = LPSSPI->addDevice(&if_cfg, cs);
+    Serial.println(deviceHandle);
     LPSSPI->setReg(LPS_WakeUp_Adress, LPS_WakeUp_Value, deviceHandle);
+    delay(1);
     return;
 }
 uint8_t LPS::WhoAmI()
 {
+    LPSSPI->setReg(LPS_WakeUp_Adress, LPS_WakeUp_Value, deviceHandle);
     return LPSSPI->readByte(LPS_WhoAmI_Adress | 0x80, deviceHandle);
     //registor 0x0F and you'll get 0d177 or 0xb1 or 0b10110001
 }
 
 void LPS::Get(int *rx)
 {
-    uint8_t rx_buf[5];
+    uint8_t rx_buf[3];
     spi_transaction_t comm = {};
     comm.flags = SPI_TRANS_VARIABLE_CMD | SPI_TRANS_VARIABLE_ADDR;
-    comm.length = (5) * 8;
+    comm.length = (3) * 8;
     comm.cmd = LPS_Data_Adress_0 | 0x80;
 
     comm.tx_buffer = NULL;
@@ -87,8 +90,8 @@ void LPS::Get(int *rx)
     // rxsub[0] = LPSSPI->readByte(LPS_Data_Adress_0 | 0x80, deviceHandle);
     // rxsub[1] = LPSSPI->readByte(LPS_Data_Adress_1 | 0x80, deviceHandle);
     // rxsub[2] = LPSSPI->readByte(LPS_Data_Adress_2 | 0x80, deviceHandle);
-
-    *rx = (int)(rx_buf[0] | rx_buf[1] << 8 | rx_buf[2] << 16);//(rx_buf[2] | rx_buf[1] << 8 | rx_buf[0] << 16);
+    // (uint32_t)RecieveData[2] << 16 | (uint16_t)RecieveData[1] << 8 | RecieveData[0];
+    *rx = (int)(rx_buf[0] | (uint16_t)rx_buf[1] << 8 | rx_buf[2] << 16);//(rx_buf[2] | rx_buf[1] << 8 | rx_buf[0] << 16);
     //*rx = 0;
     //*rx = (int)(rx_buf[3] | rx_buf[4] << 8);
     

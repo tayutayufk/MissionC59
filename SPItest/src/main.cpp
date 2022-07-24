@@ -16,8 +16,10 @@
 #define MISO 19
 #define MOSI 23
 
+#define F100KHZ 100000
 #define F1MHZ 1000000
 #define F10MHZ 10000000
+#define F50MHZ 50000000
 
 SPICreate spi;
 
@@ -34,9 +36,9 @@ void setup(){
   
 
   //flash setup
-  flash = Flash();
-  flash.begin(&spi,FLASHCS,F10MHZ);
-  delay(1);
+  // flash = Flash();
+  // flash.begin(&spi,FLASHCS,F10MHZ);
+  // delay(1);
 
   //accerolometer setup
   mpu = MPU();
@@ -45,7 +47,7 @@ void setup(){
 
   //barometer setup
   lps = LPS();
-  lps.begin(&spi,LPSCS,F1MHZ);
+  lps.begin(&spi,LPSCS,F10MHZ);
   delay(1);
 
   //bulk erase
@@ -54,8 +56,8 @@ void setup(){
   // Serial.println("erase done");
 
   //Sensors Who Am I
-  Serial.print("mpu : \t");
-  Serial.println((int)mpu.WhoAmI());
+  // Serial.print("mpu : \t");
+  // Serial.println((int)mpu.WhoAmI());
 
   Serial.print("lps : \t");
   Serial.println((int)lps.WhoAmI());
@@ -83,6 +85,7 @@ void loop(){
   // }
   // addr+=256;
   
+  // lps.begin(&spi,LPSCS,F1MHZ);
 
   //Accelerometer Sample
   int16_t accData[6];
@@ -90,16 +93,26 @@ void loop(){
   Serial.printf("Acc : x:%d\ty:%d\tz:%d\n",(int)accData[0],(int)accData[1],(int)accData[2]);
   Serial.printf("Gyro : x:%d\ty:%d\tz:%d\n",(int)accData[3],(int)accData[4],(int)accData[5]);
 
+  Serial.print("mpu : \t");
+  Serial.println((int)mpu.WhoAmI());
+
   //Barometer Sample
+
   int barData;
   lps.Get(&barData);
   Serial.printf("barometer : %d\n",barData);
 
 
-  Serial.println("fuck the world");
-  digitalWrite(LEDPIN,HIGH);
-  delay(100);
-  digitalWrite(LEDPIN,LOW);
-  delay(100);
+  Serial.print("lps : \t");
+  Serial.println((int)lps.WhoAmI());
+
+  delay(20);
+
+
+  // Serial.println("fuck the world");
+  // digitalWrite(LEDPIN,HIGH);
+  // delay(100);
+  // digitalWrite(LEDPIN,LOW);
+  // delay(100);
 
 }

@@ -65,7 +65,11 @@ void MPU::begin(SPICREATE::SPICreate *targetSPI, int cs, uint32_t freq)
 
     //Init
     MPUSPI->setReg(MPU_ACC_CONFIG, MPU_16G, deviceHandle);//set range 16G
+    delay(1);
     MPUSPI->setReg(MPU_GYRO_CONFIG, MPU_2500deg, deviceHandle);//set range 2500 deg/s
+    delay(1);
+
+
 
     return;
 }

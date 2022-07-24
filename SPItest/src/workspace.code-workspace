@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "..\\..\\SDMMCtest"
+		},
+		{
+			"name": "SPItest",
+			"path": ".."
+		},
+		{
+			"name": "RTOS_Test",
+			"path": "..\\..\\RTOS_Test"
+		}
+	],
+	"settings": {}
+}
