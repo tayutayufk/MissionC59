@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "..\\..\\..\\..\\..\\Desktop\\para\\Para6"
+		},
+		{
+			"name": "RTOS_Test",
+			"path": "..\\..\\RTOS_Test"
+		},
+		{
+			"name": "SPItest",
+			"path": ".."
+		}
+	],
+	"settings": {}
+}

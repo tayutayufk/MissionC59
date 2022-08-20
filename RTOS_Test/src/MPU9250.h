@@ -29,7 +29,7 @@
 
 #define MPU_2500deg 0x18
 
-class MPU
+class IRAM_ATTR MPU
 {
     int CS;
     int deviceHandle{-1};
@@ -38,11 +38,16 @@ class MPU
 public:
     void begin(SPICREATE::SPICreate *targetSPI, int cs, uint32_t freq = 8000000);
     uint8_t WhoAmI();
+    void CheckReg();
     void Get(int16_t *rx);
 };
 
 void MPU::begin(SPICREATE::SPICreate *targetSPI, int cs, uint32_t freq)
 {
+    pinMode(cs,OUTPUT);
+    digitalWrite(cs,HIGH);
+    delay(10);
+    digitalWrite(cs,LOW);
     CS = cs;
     MPUSPI = targetSPI;
     spi_device_interface_config_t if_cfg = {};
@@ -69,7 +74,16 @@ void MPU::begin(SPICREATE::SPICreate *targetSPI, int cs, uint32_t freq)
     MPUSPI->setReg(MPU_GYRO_CONFIG, MPU_2500deg, deviceHandle);//set range 2500 deg/s
     delay(1);
 
+    delay(100);
 
+
+    MPUSPI->setReg(MPU_ACC_CONFIG, MPU_16G, deviceHandle);//set range 16G
+    delay(1);
+    MPUSPI->setReg(MPU_GYRO_CONFIG, MPU_2500deg, deviceHandle);//set range 2500 deg/s
+    delay(1);
+
+    CheckReg();
+    delay(1);
 
     return;
 }
@@ -77,7 +91,19 @@ uint8_t MPU::WhoAmI()
 {
     return MPUSPI->readByte(0x80 | 0x75, deviceHandle);
 }
-void MPU::Get(int16_t *rx)
+
+
+void MPU::CheckReg(){
+    if(WhoAmI()!=113){
+        while(1){
+            Serial.print("Wrong Who Am I MPU ");
+            Serial.println(WhoAmI());
+            delay(1000);
+        }
+    }
+    return;
+}
+void IRAM_ATTR MPU::Get(int16_t *rx)
 {
     uint8_t rx_buf[14];
     spi_transaction_t comm = {};

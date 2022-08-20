@@ -17,21 +17,34 @@ using namespace arduino::esp32::spi::dma;
 #define CMD_PP 0x02
 #define CMD_RDSR 0x05
 
-class Flash
+class IRAM_ATTR Flash
 {
     int CS;
     int deviceHandle{-1};
     SPICREATE::SPICreate *flashSPI;
 
 public:
+    uint32_t currentAdd;
+    int pageUsage;
+    uint8_t dataBuf[256];
+
     void begin(SPICREATE::SPICreate *targetSPI, int cs, uint32_t freq = 8000000);
     void erase();
+
+    void putByte(uint8_t *data,int size);
+    void putInt(int *data,int size);
+
     void write(uint32_t addr, uint8_t *tx);
     void read(uint32_t addr, uint8_t *rx);
 };
 
 void Flash::begin(SPICREATE::SPICreate *targetSPI, int cs, uint32_t freq)
 {
+
+    currentAdd = 0;
+    pageUsage = 0;
+    for(int i = 0;i < 256;i++)dataBuf[i] = 0;
+
     CS = cs;
     flashSPI = targetSPI;
     spi_device_interface_config_t if_cfg = {};
@@ -76,12 +89,57 @@ void Flash::erase()
     {
         readStatus = flashSPI->readByte(CMD_RDSR, deviceHandle);
         Serial.print(",");
-        delay(100);
+        delay(500);
     }
     Serial.println("Bulk Erased");
     return;
 }
-void Flash::write(uint32_t addr, uint8_t *tx)
+
+
+
+void  IRAM_ATTR Flash::putByte(uint8_t *data,int size){
+    if((pageUsage/256) > 65535){
+        Serial.print("[E] SPI flash overflow!");
+        return;
+    }
+
+    if((pageUsage + size) > 256){
+        for(int i = 0; (i+pageUsage) < 256; i++){
+            dataBuf[i + pageUsage] = data[i];
+        }
+
+        write(currentAdd,dataBuf);
+
+        for(int i = 0;i < 256;i++)dataBuf[i] = 0;
+
+        for(int i = 0; i < (pageUsage + size - 256); i++){
+            dataBuf[i] = data[i + (256 - pageUsage)];
+        }
+
+        pageUsage = pageUsage + size - 256;
+        currentAdd += 256;
+
+    }else{
+        for(int i = 0; i < size; i++)dataBuf[i + pageUsage] = data[i];
+        pageUsage += size;
+    }
+}
+
+void IRAM_ATTR Flash::putInt(int *data,int size){
+    uint8_t byteData[256];
+
+    for(int i = 0;i < size;i++){
+        byteData[i * 4 + 0] = data[i] << 24;
+        byteData[i * 4 + 1] = data[i] << 16;
+        byteData[i * 4 + 2] = data[i] << 8;
+        byteData[i * 4 + 3] = data[i];
+    }
+
+    putByte(byteData,size*4);
+
+}
+
+void IRAM_ATTR Flash::write(uint32_t addr, uint8_t *tx)
 {
     flashSPI->sendCmd(CMD_WREN, deviceHandle);
     spi_transaction_t comm = {};

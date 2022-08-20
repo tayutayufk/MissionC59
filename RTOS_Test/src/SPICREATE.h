@@ -19,7 +19,7 @@ namespace arduino
             namespace dma
             {
 
-                class SPICreate
+                class IRAM_ATTR SPICreate
                 {
                     spi_bus_config_t bus_cfg = {};
                     spi_device_handle_t handle[10];
@@ -42,14 +42,14 @@ namespace arduino
                     bool rmDevice(int deviceHandle);
 
                     uint8_t readByte(uint8_t addr, int deviceHandle);
-                    void sendCmd(uint8_t cmd, int deviceHandle);
-                    void setReg(uint8_t addr, uint8_t data, int deviceHandle);
+                    void IRAM_ATTR sendCmd(uint8_t cmd, int deviceHandle);
+                    void IRAM_ATTR setReg(uint8_t addr, uint8_t data, int deviceHandle);
 
-                    void transmit(uint8_t *tx, int size, int deviceHandle);
-                    void transmit(uint8_t *tx, uint8_t *rx, int size, int deviceHandle);
-                    void transmit(spi_transaction_t *transaction, int deviceHandle);
+                    void IRAM_ATTR transmit(uint8_t *tx, int size, int deviceHandle);
+                    void IRAM_ATTR transmit(uint8_t *tx, uint8_t *rx, int size, int deviceHandle);
+                    void IRAM_ATTR transmit(spi_transaction_t *transaction, int deviceHandle);
 
-                    void pollTransmit(spi_transaction_t *transaction, int deviceHandle);
+                    void IRAM_ATTR pollTransmit(spi_transaction_t *transaction, int deviceHandle);
                 };
             } // dma
         }     // spi
